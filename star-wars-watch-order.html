@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Whole Saga, In Order — Star Wars Chronological Watch Order</title>
+<meta name="description" content="Every Star Wars film and series in chronological order, with progress tracking, notes and ratings.">
+<meta name="theme-color" content="#05070f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2305070f'/%3E%3Ccircle cx='16' cy='20' r='7' fill='%23ffd63d'/%3E%3Ccircle cx='23' cy='23' r='4' fill='%23ffab54'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="./icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./icon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
+<link rel="manifest" href="./manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SW Archive">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Share+Tech+Mono&family=Barlow:wght@400;500;600&display=swap');
+
+  :root{
+    /* deep space — blue-shifted, never grey */
+    --void:      #05070f;
+    --panel:     #0a0e1b;
+    --panel-2:   #101627;
+    --panel-3:   #161e33;
+    --line:      #1e2942;
+    --line-soft: #162034;
+
+    --text:      #dfe4f2;
+    --dim:       #8290ad;
+    --faint:     #55617d;
+
+    /* the crawl */
+    --crawl:     #ffd63d;
+    --crawl-hot: #fff1a8;
+    --crawl-dim: #8a6d12;
+
+    /* blades */
+    --saber:      #4ea8ff;
+    --saber-core: #eaf6ff;
+    --saber-dim:  #1f4d7d;
+    --green:      #62df6f;
+    --green-dim:  #235e2a;
+    --sith:       #ff4242;
+    --sith-dim:   #6d1f1f;
+
+    --font-display: 'Saira Condensed', system-ui, sans-serif;
+    --font-mono:    'Share Tech Mono', ui-monospace, monospace;
+    --font-body:    'Barlow', system-ui, sans-serif;
+
+    --blade: var(--saber);
+    --blade-dim: var(--saber-dim);
+    --blade-glow: rgba(78,168,255,0.55);
+    --blade-soft: rgba(78,168,255,0.10);
+    --blade-edge: rgba(78,168,255,0.70);
+  }
+
+  /* Order 66 — the archive changes hands */
+  body.dark-side{
+    --blade: var(--sith);
+    --blade-dim: var(--sith-dim);
+    --blade-glow: rgba(255,66,66,0.55);
+    --blade-soft: rgba(255,66,66,0.10);
+    --blade-edge: rgba(255,66,66,0.70);
+    --crawl: #ff8a6a;
+    --crawl-hot: #ffd2c2;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+
+  body{
+    background: var(--void);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    padding-bottom: 0;
+    position: relative;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* faint galactic haze behind the stars */
+  body::before{
+    content:"";
+    position: fixed; inset:0;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 70% -5%, rgba(78,168,255,0.10), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 10% 30%, rgba(255,214,61,0.045), transparent 70%),
+      radial-gradient(ellipse 90% 60% at 50% 105%, rgba(120,90,255,0.07), transparent 70%);
+    pointer-events:none;
+    z-index:0;
+    will-change: transform;   /* pin it to its own layer so scrolling never repaints the haze */
+  }
+
+  /* ===== STARFIELD (three parallax layers, baked to one tile bitmap each by JS) ===== */
+  .stars{ position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .star-layer{
+    position: absolute;
+    background-repeat: repeat;
+    will-change: transform;
+    backface-visibility: hidden;
+    contain: strict;
+  }
+  .star-layer.far{
+    background-size: 900px 900px;
+    inset: 0 0 -420px -900px;
+    animation: drift-far 260s linear infinite;
+  }
+  .star-layer.mid{
+    background-size: 700px 700px;
+    inset: 0 0 -340px -700px;
+    animation: drift-mid 170s linear infinite;
+  }
+  .star-layer.near{
+    background-size: 520px 520px;
+    inset: 0 0 -260px -520px;
+    animation: drift-near 110s linear infinite;
+  }
+  /* GPU-composited: transform instead of background-position, so nothing repaints per frame.
+     Each layer is exactly viewport + one tile on the side it drifts toward — the smallest
+     area that keeps the loop seamless, and the least texture memory to hold. */
+  @keyframes drift-far  { from{ transform: translate3d(0,0,0); } to{ transform: translate3d(900px,-420px,0); } }
+  @keyframes drift-mid  { from{ transform: translate3d(0,0,0); } to{ transform: translate3d(700px,-340px,0); } }
+  @keyframes drift-near { from{ transform: translate3d(0,0,0); } to{ transform: translate3d(520px,-260px,0); } }
+
+  /* one ship crossing, rarely — user sees it maybe twice a visit */
+  .streak{
+    position: fixed;
+    top: 18%; left: -12vw;
+    width: 190px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(220,240,255,0.9), transparent);
+    box-shadow: 0 0 7px rgba(150,205,255,0.55);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    animation: streak-go 29s linear infinite;
+    will-change: transform, opacity;
+  }
+  @keyframes streak-go{
+    0%, 86%  { transform: translate3d(0,0,0) ; opacity: 0; }
+    88%      { opacity: .9; }
+    97%      { transform: translate3d(128vw, 9vh, 0); opacity: 0; }
+    100%     { transform: translate3d(128vw, 9vh, 0); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .star-layer, .streak{ animation: none; }
+    .streak{ display:none; }
+  }
+
+  /* pause the ambient animation when the tab isn't visible */
+  html.paused .star-layer, html.paused .streak, html.paused .crawl-text{ animation-play-state: paused; }
+
+  .wrap{ max-width: 960px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  /* ================= HEADER ================= */
+  header{ padding: 44px 0 26px; position: relative; }
+
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--crawl);
+    opacity: .85;
+    margin-bottom: 14px;
+  }
+
+  h1{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(36px, 7.6vw, 68px);
+    line-height: 0.94;
+    letter-spacing: -0.005em;
+    margin: 0;
+    color: var(--crawl);
+    text-transform: uppercase;
+    text-shadow: 0 0 26px rgba(255,214,61,0.22);
+  }
+  h1 .thin{
+    display:block;
+    font-weight: 500;
+    font-size: 0.42em;
+    letter-spacing: 0.34em;
+    color: var(--text);
+    text-shadow: none;
+    opacity: .78;
+    margin-bottom: 6px;
+  }
+
+  .kicker{
+    font-size: 15px;
+    color: var(--dim);
+    margin: 14px 0 0;
+    max-width: 60ch;
+  }
+  .kicker b{ color: var(--text); font-weight: 600; }
+
+  /* ---- THE CRAWL ---- */
+  .crawl-stage{
+    position: relative;
+    height: 178px;
+    margin: 20px 0 26px;
+    overflow: hidden;
+    perspective: 270px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 34%, #000 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, #000 34%, #000 100%);
+  }
+  .crawl-plane{
+    position: absolute; inset: 0;
+    transform: rotateX(46deg);
+    transform-origin: 50% 100%;
+    overflow: hidden;
+  }
+  .crawl-text{
+    position: absolute;
+    top: 0; left: 9%; right: 9%;
+    color: var(--crawl);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 19px;
+    line-height: 1.42;
+    text-align: justify;
+    text-shadow: 0 0 14px rgba(255,214,61,0.3);
+    animation: crawl-up 40s linear infinite;
+    animation-delay: -8s;
+  }
+  .crawl-text p{ margin: 0 0 0.85em; }
+  .crawl-text p:last-child{ margin-bottom: 0; }
+  @keyframes crawl-up{
+    from { transform: translateY(178px); }
+    to   { transform: translateY(-105%); }
+  }
+  /* faint horizon glow, so the frame reads as a window even between lines */
+  .crawl-stage::after{
+    content:"";
+    position:absolute; inset:0;
+    background: radial-gradient(ellipse 60% 55% at 50% 114%, rgba(255,214,61,0.11), transparent 72%);
+    pointer-events:none;
+  }
+
+  /* scrolled out of the hero: nothing to look at, so stop the only per-frame repaint */
+  .crawl-stage.idle .crawl-text{ animation-play-state: paused; }
+
+  .crawl-static{ display: none; }
+  @media (prefers-reduced-motion: reduce){
+    .crawl-stage{ display: none; }
+    .crawl-static{
+      display: block;
+      margin: 24px 0 4px;
+      color: var(--crawl);
+      font-family: var(--font-display);
+      font-size: 16px;
+      line-height: 1.5;
+      border-left: 2px solid var(--crawl-dim);
+      padding-left: 14px;
+      max-width: 62ch;
+    }
+    .crawl-static p{ margin: 0 0 .7em; }
+  }
+  @media (max-width: 640px){
+    .eyebrow{ letter-spacing: 0.13em; font-size: 10px; }
+    .crawl-stage{ height: 150px; perspective: 230px; }
+    .crawl-text{ font-size: 14px; left: 4%; right: 4%; }
+  }
+
+  /* ===== STATS ===== */
+  .statbar{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 26px;
+  }
+  .stat{ background: var(--panel); padding: 15px 14px; }
+  .stat .num{
+    display: block;
+    font-family: var(--font-mono);
+    font-size: clamp(19px, 3.2vw, 27px);
+    color: var(--text);
+    line-height: 1.15;
+  }
+  .stat.lead .num{ color: var(--crawl); text-shadow: 0 0 14px rgba(255,214,61,0.3); }
+  .stat .lbl{
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+    margin-top: 4px;
+  }
+  @media (max-width: 620px){ .statbar{ grid-template-columns: repeat(2, 1fr); } }
+
+  /* ===== LIGHTSABER PROGRESS ===== */
+  .saber-shell{
+    margin-top: 20px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 16px 18px 14px;
+    position: relative;
+  }
+  .saber-top{
+    display:flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--font-mono); font-size: 12px; color: var(--dim);
+    margin-bottom: 12px;
+  }
+  .saber-top strong{ color: var(--text); font-size: 15px; font-weight: 400; }
+
+  .saber{ display:flex; align-items:center; height: 26px; }
+  .hilt{
+    flex: 0 0 auto;
+    width: 46px; height: 13px;
+    border-radius: 2px 1px 1px 2px;
+    background:
+      repeating-linear-gradient(90deg, #2a3348 0 2px, #3d4a66 2px 4px) 0 0/22px 100% no-repeat,
+      linear-gradient(180deg, #55617f, #2b3345 45%, #161d2d);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 1px 3px rgba(0,0,0,.6);
+    position: relative;
+  }
+  .hilt::after{
+    content:"";
+    position:absolute; right:-3px; top:50%; transform: translateY(-50%);
+    width: 5px; height: 7px; border-radius: 1px;
+    background: linear-gradient(180deg, #8d99b5, #46516d);
+  }
+  .blade-track{
+    flex: 1 1 auto;
+    height: 9px;
+    margin-left: 4px;
+    background: var(--panel-2);
+    border-radius: 0 5px 5px 0;
+    border: 1px solid var(--line);
+    border-left: none;
+    position: relative;
+    overflow: visible;
+  }
+  .blade{
+    position:absolute; left: 0; top: 50%; transform: translateY(-50%);
+    height: 9px; width: 0%;
+    border-radius: 0 5px 5px 0;
+    background: linear-gradient(180deg, var(--blade) 0%, var(--saber-core) 45%, var(--blade) 100%);
+    box-shadow:
+      0 0 10px 1px var(--blade),
+      0 0 26px 4px var(--blade-glow);
+    transition: width .55s cubic-bezier(.2,.9,.3,1), background .4s ease;
+  }
+  .blade::after{
+    content:"";
+    position:absolute; right:-3px; top:50%; transform: translateY(-50%);
+    width: 9px; height: 13px; border-radius: 50%;
+    background: var(--saber-core);
+    filter: blur(2.5px);
+    opacity: .95;
+    will-change: transform;
+  }
+  .blade.zero{ box-shadow:none; }
+  .blade.zero::after{ display:none; }
+
+  .saber-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top: 16px; }
+  .btn{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 6px 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color .18s ease, color .18s ease, background .18s ease;
+  }
+  .btn:hover{ color: var(--text); border-color: var(--faint); }
+  .btn.go{ border-color: var(--blade-dim); color: var(--blade); }
+  .btn.go:hover{ background: var(--blade-soft); border-color: var(--blade); }
+  .btn.danger:hover{ border-color: var(--sith); color: var(--sith); }
+  .btn:focus-visible, .pill:focus-visible, .check:focus-visible,
+  .era-head:focus-visible, .track-btn:focus-visible, .star-btn:focus-visible,
+  .note-toggle:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline: 2px solid var(--crawl);
+    outline-offset: 2px;
+  }
+
+  /* pace planner */
+  .pace{
+    display:flex; align-items:center; gap: 14px; flex-wrap: wrap;
+    margin-top: 14px; padding-top: 13px;
+    border-top: 1px dashed var(--line);
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--dim);
+  }
+  .pace input[type=range]{
+    -webkit-appearance:none; appearance:none;
+    width: 150px; height: 3px; border-radius: 2px;
+    background: var(--line); outline: none; cursor: pointer;
+  }
+  .pace input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width: 13px; height: 13px; border-radius: 50%;
+    background: var(--blade);
+    box-shadow: 0 0 8px var(--blade);
+    cursor: pointer;
+  }
+  .pace input[type=range]::-moz-range-thumb{
+    width: 13px; height: 13px; border: none; border-radius: 50%;
+    background: var(--blade); box-shadow: 0 0 8px var(--blade); cursor: pointer;
+  }
+  .pace .eta{ color: var(--crawl); }
+
+  /* order 66 banner */
+  .order66{
+    display: none;
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--sith);
+    border: 1px solid var(--sith-dim);
+    background: rgba(255,66,66,0.07);
+    border-radius: 3px;
+    padding: 7px 10px;
+  }
+  body.dark-side .order66{ display: block; }
+
+  /* ===== LEGEND + CONTROLS ===== */
+  .legend{
+    display:flex; flex-wrap: wrap; gap: 8px 18px;
+    margin-top: 22px;
+    font-size: 12px; color: var(--faint);
+  }
+  .legend span.row{ display:inline-flex; align-items:center; gap: 7px; }
+
+  .tag{
+    display:inline-block;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: .07em;
+    padding: 2px 6px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .tag.core   { color: var(--saber); border:1px solid var(--saber-dim); background: rgba(78,168,255,.10); }
+  .tag.worth  { color: var(--green); border:1px solid var(--green-dim); background: rgba(98,223,111,.09); }
+  .tag.side   { color: var(--faint); border:1px solid var(--line); background: rgba(130,144,173,.06); }
+  .tag.soon   { color: var(--crawl); border:1px solid var(--crawl-dim); background: rgba(255,214,61,.09); }
+
+  .controls{ display:flex; gap: 10px; flex-wrap: wrap; align-items:center; margin-top: 18px; }
+  .search-box{
+    flex: 1 1 210px;
+    display:flex; align-items:center; gap:8px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 9px 12px;
+    transition: border-color .2s ease;
+  }
+  .search-box:focus-within{ border-color: var(--blade-dim); }
+  .search-box svg{ opacity:.45; flex:0 0 auto; }
+  .search-box input{
+    background:none; border:none; outline:none; width:100%;
+    color: var(--text); font-family: var(--font-body); font-size: 13.5px;
+  }
+  .search-box input::placeholder{ color: var(--faint); }
+
+  .pills{ display:flex; gap:6px; flex-wrap:wrap; }
+  .pill{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 8px 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color .18s ease, color .18s ease, background .18s ease;
+  }
+  .pill:hover{ color: var(--text); }
+  .pill.active{ color: var(--crawl); border-color: var(--crawl-dim); background: rgba(255,214,61,.07); }
+
+  /* ===== TRACKS ===== */
+  .tracks{
+    display:flex; gap: 26px;
+    margin-top: 34px;
+    border-bottom: 1px solid var(--line);
+  }
+  .track-btn{
+    background:none; border:none; cursor:pointer;
+    font-family: var(--font-display);
+    font-size: 16px; font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--faint);
+    padding: 10px 0 12px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color .18s ease;
+  }
+  .track-btn:hover{ color: var(--dim); }
+  .track-btn.active{ color: var(--crawl); border-bottom-color: var(--crawl); }
+  .track-panel{ display:none; }
+  .track-panel.active{ display:block; animation: jump-in .5s ease-out; }
+  @keyframes jump-in{
+    0%  { opacity: 0; transform: translateX(26px); filter: blur(3px); }
+    100%{ opacity: 1; transform: none; filter: none; }
+  }
+  @media (prefers-reduced-motion: reduce){ .track-panel.active{ animation: none; } }
+
+  .track-intro{
+    font-size: 13.5px; color: var(--dim);
+    margin: 18px 0 6px;
+    max-width: 70ch;
+    border-left: 2px solid var(--line);
+    padding-left: 14px;
+  }
+  .track-intro b{ color: var(--text); font-weight:600; }
+
+  /* ===== ERA SECTIONS (a timeline — the content really is a sequence) ===== */
+  .era{ margin-top: 30px; }
+  .era-head{
+    width: 100%;
+    display:flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    background: none; border: none; cursor: pointer;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    color: inherit;
+  }
+  .era-name{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 21px;
+    letter-spacing: .01em;
+    text-transform: uppercase;
+    color: var(--text);
+    display:flex; align-items: baseline; gap: 11px;
+    min-width: 0;
+  }
+  .era-when{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--crawl);
+    opacity: .75;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  .era-meta{
+    display:flex; align-items:center; gap: 11px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--faint);
+    white-space: nowrap;
+  }
+  .chev{ transition: transform .25s ease; display:inline-block; }
+  .era.collapsed .chev{ transform: rotate(-90deg); }
+  .era.collapsed .item-list{ display:none; }
+  .era.filtered-out{ display:none; }
+
+  .era-done .era-name{ color: var(--green); }
+  .era-seal{
+    display:none;
+    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .1em;
+    color: var(--green); border: 1px solid var(--green-dim);
+    border-radius: 2px; padding: 2px 7px;
+  }
+  .era-done .era-seal{ display:inline-block; }
+
+  /* ===== ITEMS ===== */
+  .item-list{ padding-left: 2px; }
+  .item{
+    display:flex; gap: 14px; align-items: flex-start;
+    padding: 14px 6px 14px 2px;
+    border-bottom: 1px solid var(--line-soft);
+    position: relative;
+  }
+  .item.done{ opacity: .42; }
+  .item.done .item-title{ text-decoration: line-through; text-decoration-color: var(--faint); }
+  .item.filtered-out{ display:none; }
+  .item.is-next .next-flag{ display: block; }
+  .item.rated .rating-clear{ display: block; }
+  .item.is-next{
+    background: linear-gradient(90deg, var(--blade-soft), transparent 55%);
+    border-left: 2px solid var(--blade);
+    padding-left: 12px;
+    margin-left: -14px;
+    padding-right: 6px;
+  }
+
+  .check{
+    flex: 0 0 auto;
+    width: 21px; height: 21px;
+    margin-top: 2px;
+    border: 1.5px solid var(--line);
+    border-radius: 3px;
+    background: var(--panel-2);
+    color: transparent;
+    font-size: 12px;
+    display:flex; align-items:center; justify-content:center;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, box-shadow .3s ease;
+  }
+  .check:hover{ border-color: var(--blade-dim); }
+  .item.done .check{
+    background: var(--blade);
+    border-color: var(--blade);
+    color: #04101d;
+    box-shadow: 0 0 10px var(--blade-edge);
+  }
+  .check[disabled]{
+    cursor: not-allowed; opacity: .3;
+    background: repeating-linear-gradient(45deg, var(--panel-2) 0 3px, var(--line) 3px 6px);
+  }
+
+  .item-body{ flex: 1 1 auto; min-width: 0; }
+  .title-row{ display:flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+  .item-title{ font-size: 15.5px; font-weight: 600; color: var(--text); }
+  .item-year{ font-family: var(--font-mono); font-size: 11.5px; color: var(--faint); }
+  .item-desc{ font-size: 13px; color: var(--dim); margin-top: 4px; line-height: 1.5; max-width: 72ch; }
+  .kind{ font-family: var(--font-mono); font-size: 10px; color: var(--faint); }
+
+  .item-right{ flex: 0 0 auto; display:flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .runtime{
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--dim);
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 3px; padding: 3px 8px; white-space: nowrap;
+  }
+  .when-tag{ font-family: var(--font-mono); font-size: 10px; color: var(--crawl); opacity:.6; }
+
+  .next-flag{
+    display: none;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .08em;
+    color: var(--blade); border: 1px solid var(--blade-dim);
+    background: var(--blade-soft);
+    border-radius: 2px; padding: 2px 6px; white-space: nowrap;
+  }
+
+  /* rating */
+  .stars-row{ display:flex; align-items:center; gap: 2px; margin-top: 7px; }
+  .star-btn{
+    background:none; border:none; cursor:pointer; padding: 0 2px;
+    font-size: 13px; line-height: 1; color: #2e3a57;
+    transition: color .15s ease, transform .15s ease;
+  }
+  .star-btn:hover{ transform: scale(1.18); }
+  .star-btn.on{ color: var(--crawl); text-shadow: 0 0 8px rgba(255,214,61,.45); }
+  .rating-clear{
+    display: none;
+    background:none; border:none; cursor:pointer;
+    font-family: var(--font-mono); font-size: 9.5px; color: var(--faint);
+    margin-left: 5px; padding: 2px 3px;
+  }
+  .rating-clear:hover{ color: var(--sith); }
+
+  /* notes */
+  .note-toggle{
+    background:none; border:none; cursor:pointer;
+    font-family: var(--font-mono); font-size: 10px; color: var(--faint);
+    padding: 3px 0; margin-top: 5px;
+    text-decoration: underline dotted;
+  }
+  .note-toggle:hover{ color: var(--crawl); }
+  .note-box{ display:none; margin-top: 6px; }
+  .note-box.open{ display:block; }
+  .note-box textarea{
+    width: 100%; max-width: 640px;
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 3px; color: var(--text);
+    font-family: var(--font-body); font-size: 13px;
+    padding: 8px; resize: vertical; min-height: 44px;
+  }
+  .note-box textarea:focus{ outline:none; border-color: var(--crawl-dim); }
+  .saved{ font-family: var(--font-mono); font-size: 9px; color: var(--green); opacity:0; transition: opacity .3s ease; margin-left: 6px; }
+  .saved.show{ opacity:1; }
+
+  .empty{
+    display:none;
+    text-align:center; padding: 46px 0;
+    font-family: var(--font-mono); font-size: 13px; color: var(--dim);
+  }
+  .empty b{ display:block; color: var(--text); margin-bottom: 6px; font-weight: 400; }
+
+  /* ===== ARCHIVE NOTES ===== */
+  .notes-panel{
+    margin-top: 46px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--crawl-dim);
+    border-radius: 3px;
+    padding: 22px 24px;
+  }
+  .notes-panel h2{
+    font-family: var(--font-display);
+    font-size: 17px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .03em; color: var(--crawl);
+    margin: 0 0 14px;
+  }
+  .notes-panel ul{ margin:0; padding-left: 17px; }
+  .notes-panel li{ font-size: 13.5px; color: var(--dim); margin-bottom: 11px; line-height: 1.55; max-width: 76ch; }
+  .notes-panel li::marker{ color: var(--crawl-dim); }
+  .notes-panel b{ color: var(--text); font-weight: 600; }
+
+  /* ===== TWIN SUNS FOOTER ===== */
+  .sunset{
+    position: relative;
+    margin-top: 58px;
+    height: 210px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 24%, #000 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, #000 24%, #000 100%);
+  }
+  .sunset svg{ position:absolute; bottom:0; left:50%; transform: translateX(-50%); width: 130%; min-width: 760px; height: 100%; display:block; }
+  footer{
+    position: relative;
+    text-align: center;
+    padding: 0 20px 34px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .06em;
+    color: var(--faint);
+    line-height: 2;
+    background: #07040a;
+  }
+  .sig{ color: var(--crawl-dim); }
+  @media (max-width: 640px){
+    .sunset{ height: 150px; }
+  }
+
+</style>
+</head>
+<body>
+<div class="stars" aria-hidden="true">
+  <div class="star-layer far"></div>
+  <div class="star-layer mid"></div>
+  <div class="star-layer near"></div>
+</div>
+<div class="streak" aria-hidden="true"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">GALACTIC ARCHIVE / CHRONOLOGICAL RECORD</div>
+
+    <h1><span class="thin">A long time ago…</span>The whole saga, in order</h1>
+
+    <p class="kicker">
+      Every <b>Star Wars</b> film and series arranged the way the galaxy lived them, not the way we got them.
+      Thirty-four entries across six eras, plus whatever comes next.
+    </p>
+
+    <div class="crawl-stage" aria-hidden="true">
+      <div class="crawl-plane"><div class="crawl-text">
+        <p>It is a period of civil rest. Nine decades of films and series lie scattered across the galaxy, and not one of them arrived in the order events actually occurred.</p>
+        <p>This record restores the sequence — from the last golden years of the Jedi Order, through the fall, the Empire, the Rebellion, and the ruin that followed.</p>
+        <p>Mark each entry as it is completed. The archive remembers, even when you do not…</p>
+      </div></div>
+    </div>
+    <div class="crawl-static">
+      <p>Nine decades of films and series, none of them released in the order events occurred.</p>
+      <p>This record restores the sequence, from the last golden years of the Jedi Order through to the ruin that followed the Empire.</p>
+    </div>
+
+    <div class="statbar">
+      <div class="stat lead">
+        <span class="num" id="statWatched">0</span>
+        <span class="lbl">ENTRIES WATCHED</span>
+      </div>
+      <div class="stat">
+        <span class="num" id="statLeft">—</span>
+        <span class="lbl">STILL AHEAD</span>
+      </div>
+      <div class="stat">
+        <span class="num" id="statRuntime">—</span>
+        <span class="lbl">RUNTIME REMAINING</span>
+      </div>
+      <div class="stat">
+        <span class="num" id="statRated">—</span>
+        <span class="lbl">YOUR AVERAGE</span>
+      </div>
+    </div>
+
+    <div class="saber-shell" id="saberShell">
+      <div class="saber-top">
+        <span><strong id="doneCount">0</strong> / <span id="totalCount">34</span> entries logged</span>
+        <span id="donePct">0%</span>
+      </div>
+
+      <div class="saber">
+        <div class="hilt" aria-hidden="true"></div>
+        <div class="blade-track">
+          <div class="blade zero" id="blade"></div>
+        </div>
+      </div>
+
+      <div class="saber-actions">
+        <button class="btn go" id="jumpBtn">Jump to what's next</button>
+        <button class="btn" id="exportBtn">Export progress</button>
+        <button class="btn" id="importBtn">Import progress</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+        <button class="btn danger" id="resetBtn">Reset</button>
+      </div>
+
+      <div class="pace">
+        <label for="paceRange" style="display:flex;align-items:center;gap:10px;">
+          <span id="paceLabel">2h a day</span>
+          <input type="range" id="paceRange" min="1" max="16" step="1" value="4" aria-label="Hours watched per day">
+        </label>
+        <span class="eta" id="paceEta">—</span>
+      </div>
+
+      <div class="order66" id="order66">ORDER 66 EXECUTED — ARCHIVE COMPROMISED. Clear the search field to restore.</div>
+    </div>
+
+    <div class="legend">
+      <span class="row"><span class="tag core">CORE</span> the spine of the story</span>
+      <span class="row"><span class="tag worth">WORTH IT</span> optional, but you'd be missing out</span>
+      <span class="row"><span class="tag side">SIDE PATH</span> safe to skip on a first run</span>
+      <span class="row"><span class="tag soon">INCOMING</span> not released yet</span>
+    </div>
+
+    <div class="controls">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Search the archive…" aria-label="Search titles">
+      </div>
+      <div class="pills">
+        <button class="pill active" data-filter="all">Everything</button>
+        <button class="pill" data-filter="core">Core only</button>
+        <button class="pill" data-filter="unwatched">Unwatched</button>
+        <button class="pill" data-filter="films">Films</button>
+        <button class="pill" data-filter="rated">Rated 4+</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="tracks" role="tablist">
+    <button class="track-btn active" data-track="chrono" role="tab">In-story order</button>
+    <button class="track-btn" data-track="release" role="tab">Release order</button>
+    <button class="track-btn" data-track="outer" role="tab">Outer rim</button>
+  </div>
+
+  <div class="track-panel active" id="track-chrono" role="tabpanel">
+    <p class="track-intro">
+      The order events happen in, following the six eras Lucasfilm uses. It matches the official chronological
+      list on StarWars.com, with one refinement: <b>The Book of Boba Fett</b> is slotted between Mandalorian
+      seasons 2 and 3, because that's where its story actually sits.
+    </p>
+    <div id="chronoEras"></div>
+  </div>
+
+  <div class="track-panel" id="track-release" role="tabpanel">
+    <p class="track-intro">
+      The order the galaxy found out — 1977 to now. Reveals land the way they were built to land, and
+      <b>The Empire Strikes Back</b> keeps its secret. The cost is that Anakin's story arrives backwards.
+      Same entries, same checkboxes: tick something here and it ticks over there too.
+    </p>
+    <div id="releaseEras"></div>
+  </div>
+
+  <div class="track-panel" id="track-outer" role="tabpanel">
+    <p class="track-intro">
+      Anthologies, LEGO, Ewok films and the odd curiosity. None of it is required, some of it isn't canon,
+      and the Holiday Special is in here purely so you know what you're getting into.
+      Kept out of the count so it can't ruin your percentage.
+    </p>
+    <div id="outerEras"></div>
+  </div>
+
+  <div class="empty" id="emptyState">
+    <b>Nothing in the archive matches that.</b>
+    Clear the search or choose a different filter.
+  </div>
+
+  <div class="notes-panel">
+    <h2>Notes from the archive</h2>
+    <ul>
+      <li><b>The Clone Wars film comes before the series.</b> It was released in cinemas as a pilot, and it's where Ahsoka is introduced — watch it first, then the seven seasons. Everything here happens well before Order 66, which is Revenge of the Sith.</li>
+      <li><b>The three Tales anthologies float.</b> Tales of the Jedi, Tales of the Empire and Tales of the Underworld each jump around in time by design, so any placement is a compromise. These are the spots StarWars.com uses; nothing breaks if you watch them elsewhere.</li>
+      <li><b>Andor and Rebels run at the same time.</b> They're on opposite sides of the galaxy and never touch, so the order between them is yours. Both finish just before Rogue One.</li>
+      <li><b>Book of Boba Fett is half a Mandalorian season.</b> Episodes 5 and 6 barely feature Boba and lead straight into Mandalorian season 3. If you skip the rest, don't skip those two.</li>
+      <li><b>Short on time?</b> The CORE entries alone are the through-line: the nine numbered films, the Clone Wars, both Andor seasons, and Rogue One. That's the story. Everything else deepens it.</li>
+      <li><b>Runtimes for series are estimates</b> — full-season totals at average episode length, not per episode. Films are exact. Anything marked INCOMING can't be ticked off until it's out.</li>
+      <li><b>Left out on purpose:</b> video games, novels and comics. Canon, but this is a watch order. Visions and the rest of the odds and ends live under Outer rim.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sunset" aria-hidden="true">
+  <svg viewBox="0 0 900 210" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#05070f"/>
+        <stop offset="42%"  stop-color="#1b1026"/>
+        <stop offset="72%"  stop-color="#5c2a24"/>
+        <stop offset="88%"  stop-color="#b55a25"/>
+        <stop offset="100%" stop-color="#e2933a"/>
+      </linearGradient>
+      <radialGradient id="sunBig" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"   stop-color="#fff4cf"/>
+        <stop offset="55%"  stop-color="#ffc25e"/>
+        <stop offset="100%" stop-color="#ff9a3c" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="sunSmall" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"   stop-color="#ffe9bb"/>
+        <stop offset="60%"  stop-color="#ffab54"/>
+        <stop offset="100%" stop-color="#ff8a3c" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="dune" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#1a0d10"/>
+        <stop offset="100%" stop-color="#07040a"/>
+      </linearGradient>
+    </defs>
+
+    <rect width="900" height="210" fill="url(#sky)"/>
+    <circle cx="470" cy="176" r="62" fill="url(#sunBig)" opacity="0.95"/>
+    <circle cx="559" cy="181" r="37" fill="url(#sunSmall)" opacity="0.92"/>
+    <path d="M0,196 C90,178 150,190 232,186 C310,182 352,160 438,164 C520,168 556,186 640,182 C724,178 800,192 900,184 L900,210 L0,210 Z" fill="url(#dune)"/>
+    <path d="M0,204 C120,196 220,206 330,200 C440,194 540,204 660,199 C760,195 840,205 900,201 L900,210 L0,210 Z" fill="#07040a"/>
+  </svg>
+</div>
+
+<footer>
+  34 entries · roughly <span id="footRuntime">—</span> of screen time · progress saved in this browser only<br>
+  export it before you clear your browsing data<br>
+  <span class="sig">Assembled by Claude · the Force will be with you, always</span>
+</footer>
+
+<script>
+/* ==========================================================
+   THE ARCHIVE
+   Every title lives once, keyed by slug. The three tracks are
+   just different orderings of those keys — so ticking a box in
+   one track ticks it everywhere.
+
+   tag:  core | worth | side        m: runtime in minutes
+   soon: true = not released yet, checkbox disabled
+   side_only: true = Outer rim, excluded from all totals
+   ========================================================== */
+const ITEMS = {
+  /* ---------- The High Republic ---------- */
+  acolyte: {t:"The Acolyte", y:"2024", kind:"series", eps:8, m:320, tag:"side", when:"132 BBY",
+    d:"A Jedi investigation a century before the Republic starts to rot. Connects to nothing else on this list, so it's a clean place to begin or an easy one to leave out."},
+
+  /* ---------- Fall of the Jedi ---------- */
+  ep1: {t:"Episode I — The Phantom Menace", y:"1999", kind:"film", m:136, tag:"core", when:"32 BBY",
+    d:"A blockade, a boy on Tatooine, and a Sith Lord nobody believes is real."},
+  ep2: {t:"Episode II — Attack of the Clones", y:"2002", kind:"film", m:142, tag:"core", when:"22 BBY",
+    d:"Ten years later: an army nobody ordered turns up, and the war starts on the final shot."},
+  cwfilm: {t:"The Clone Wars (film)", y:"2008", kind:"film", m:98, tag:"worth", when:"22 BBY",
+    d:"The series pilot, released in cinemas. It's where Ahsoka Tano walks in, so it goes before the show."},
+  cwseries: {t:"The Clone Wars (series)", y:"2008–2020", kind:"series", eps:133, m:2926, tag:"core", when:"22–19 BBY",
+    d:"Seven seasons, and the strongest argument the prequel era has. It's the reason Revenge of the Sith hits as hard as it does."},
+  totj: {t:"Tales of the Jedi", y:"2022", kind:"series", eps:6, m:85, tag:"worth", when:"anthology",
+    d:"Six shorts split between young Ahsoka and Dooku's slow turn. Jumps around in time — slot it in anywhere near here."},
+  ep3: {t:"Episode III — Revenge of the Sith", y:"2005", kind:"film", m:140, tag:"core", when:"19 BBY",
+    d:"Order 66. The clones turn on the Jedi and the Republic becomes the Empire in a single night."},
+
+  /* ---------- Reign of the Empire ---------- */
+  tote: {t:"Tales of the Empire", y:"2024", kind:"series", eps:6, m:90, tag:"worth", when:"anthology",
+    d:"Morgan Elsbeth's rise and Barriss Offee's fall. Feeds directly into Ahsoka, so it's worth catching first."},
+  totu: {t:"Tales of the Underworld", y:"2025", kind:"series", eps:6, m:90, tag:"side", when:"anthology",
+    d:"Asajj Ventress and Cad Bane get the same treatment, further out past the reach of the law."},
+  badbatch: {t:"The Bad Batch", y:"2021–2024", kind:"series", eps:47, m:1175, tag:"worth", when:"19–18 BBY",
+    d:"Clone Force 99 in the months after the Republic falls. The clearest picture of how the Empire actually took hold."},
+  maul1: {t:"Maul — Shadow Lord", y:"2026", kind:"series", eps:10, m:250, tag:"worth", when:"~18 BBY",
+    d:"How Maul builds a criminal empire from nothing. Fills the long gap between The Clone Wars and his appearance at the end of Solo."},
+  maul2: {t:"Maul — Shadow Lord, Season 2", y:"2027", kind:"series", eps:10, m:250, tag:"worth", when:"~18 BBY", soon:true,
+    d:"Renewed and in production. No release date announced yet."},
+  solo: {t:"Solo: A Star Wars Story", y:"2018", kind:"film", m:135, tag:"side", when:"10 BBY",
+    d:"Han's origin — the Falcon, the Kessel Run, and one very good surprise in the last five minutes."},
+  kenobi: {t:"Obi-Wan Kenobi", y:"2022", kind:"series", eps:6, m:260, tag:"worth", when:"9 BBY",
+    d:"Ten years into exile, pulled off Tatooine for one job. Vader is the reason to watch it."},
+  andor1: {t:"Andor — Season 1", y:"2022", kind:"series", eps:12, m:570, tag:"core", when:"5 BBY",
+    d:"How an ordinary thief turns into a rebel. The best-written thing in the franchise, and it barely mentions the Force."},
+  andor2: {t:"Andor — Season 2", y:"2025", kind:"series", eps:12, m:580, tag:"core", when:"4–1 BBY",
+    d:"Four years told in four blocks, ending in the hours before Rogue One picks up."},
+  rebels: {t:"Star Wars Rebels", y:"2014–2018", kind:"series", eps:75, m:1650, tag:"worth", when:"5–1 BBY",
+    d:"Runs alongside Andor from the other end of the galaxy. Sets up Thrawn, Ezra and most of what Ahsoka is about."},
+  rogueone: {t:"Rogue One: A Star Wars Story", y:"2016", kind:"film", m:133, tag:"core", when:"0 BBY",
+    d:"The Death Star plans, stolen. Ends roughly on the minute A New Hope begins."},
+
+  /* ---------- Age of Rebellion ---------- */
+  ep4: {t:"Episode IV — A New Hope", y:"1977", kind:"film", m:121, tag:"core", when:"0 ABY",
+    d:"A farm boy, a smuggler and a stolen plan. The one everything else is measured against."},
+  ep5: {t:"Episode V — The Empire Strikes Back", y:"1980", kind:"film", m:124, tag:"core", when:"3 ABY",
+    d:"The Rebellion loses, badly, and the saga gets its best line. Widely the high point."},
+  ep6: {t:"Episode VI — Return of the Jedi", y:"1983", kind:"film", m:131, tag:"core", when:"4 ABY",
+    d:"Jabba, Endor, and the end of the Emperor. Closes the original trilogy."},
+
+  /* ---------- The New Republic ---------- */
+  mando1: {t:"The Mandalorian — Season 1", y:"2019", kind:"series", eps:8, m:285, tag:"worth", when:"9 ABY",
+    d:"A bounty hunter takes a job, keeps the bounty. Five years after the Empire fell."},
+  mando2: {t:"The Mandalorian — Season 2", y:"2020", kind:"series", eps:8, m:315, tag:"worth", when:"9 ABY",
+    d:"The search for Grogu's people, and the point where the wider galaxy starts showing up."},
+  bobf: {t:"The Book of Boba Fett", y:"2021", kind:"series", eps:7, m:305, tag:"side", when:"9 ABY",
+    d:"Boba's own half is patchy, but episodes 5 and 6 are Mandalorian episodes in everything but name and lead straight into season 3."},
+  mando3: {t:"The Mandalorian — Season 3", y:"2023", kind:"series", eps:8, m:320, tag:"worth", when:"9 ABY",
+    d:"Mandalore itself, and the covert trying to rebuild. Assumes you've seen Boba Fett's episodes 5 and 6."},
+  ahsoka1: {t:"Ahsoka", y:"2023", kind:"series", eps:8, m:370, tag:"worth", when:"9 ABY",
+    d:"The live-action follow-up to Rebels, hunting for Thrawn. Much richer if you've watched Rebels first."},
+  skeleton: {t:"Skeleton Crew", y:"2024", kind:"series", eps:8, m:330, tag:"side", when:"9 ABY",
+    d:"Four kids lost in space with a stranger. Standalone, warm, and needs nothing else to work."},
+  mandogrogu: {t:"The Mandalorian and Grogu", y:"2026", kind:"film", m:132, tag:"worth", when:"~9 ABY",
+    d:"The first Star Wars film in seven years, picking up after season 3 with Din and Grogu working for the New Republic."},
+  ahsoka2: {t:"Ahsoka — Season 2", y:"Jan 20, 2027", kind:"series", eps:8, m:370, tag:"worth", when:"9 ABY", soon:true,
+    d:"Eight episodes, arriving January 2027. Thrawn, Ezra and the Imperial remnant."},
+
+  /* ---------- Rise of the First Order ---------- */
+  resistance: {t:"Star Wars Resistance", y:"2018–2020", kind:"series", eps:40, m:880, tag:"side", when:"34–35 ABY",
+    d:"Starts before The Force Awakens and carries on past it. Aimed at a younger audience — the easiest cut on the list."},
+  ep7: {t:"Episode VII — The Force Awakens", y:"2015", kind:"film", m:138, tag:"core", when:"34 ABY",
+    d:"Thirty years on, a new order and a scavenger who turns out to matter."},
+  ep8: {t:"Episode VIII — The Last Jedi", y:"2017", kind:"film", m:152, tag:"core", when:"34 ABY",
+    d:"Picks up minutes later. The one people are still arguing about."},
+  ep9: {t:"Episode IX — The Rise of Skywalker", y:"2019", kind:"film", m:142, tag:"core", when:"35 ABY",
+    d:"A year later, and the end of the Skywalker story."},
+
+  /* ---------- Beyond ---------- */
+  starfighter: {t:"Star Wars: Starfighter", y:"May 28, 2027", kind:"film", m:130, tag:"worth", when:"after 35 ABY", soon:true,
+    d:"A new story set after The Rise of Skywalker, directed by Shawn Levy. No connection to the saga's cast announced."},
+
+  /* ---------- Outer rim — never counted ---------- */
+  visions1: {t:"Visions — Volume 1", y:"2021", kind:"series", eps:9, m:155, tag:"worth", when:"non-canon", side_only:true,
+    d:"Nine anime studios, nine takes on Star Wars, no continuity at all. The Duel and The Ninth Jedi are the standouts."},
+  visions2: {t:"Visions — Volume 2", y:"2023", kind:"series", eps:9, m:155, tag:"worth", when:"non-canon", side_only:true,
+    d:"Widens out past Japan — Chile, Ireland, South Africa, India. Screecher's Reach is the one people remember."},
+  visions3: {t:"Visions — Volume 3", y:"2025", kind:"series", eps:9, m:155, tag:"worth", when:"non-canon", side_only:true,
+    d:"Back to the Japanese studios, several of them continuing volume 1 stories."},
+  ninthjedi: {t:"Visions Presents: The Ninth Jedi", y:"2026", kind:"series", eps:8, m:185, tag:"worth", when:"non-canon", side_only:true,
+    d:"A full series grown out of the volume 1 short, set far enough ahead that the Jedi are a legend. Better than it has any right to be."},
+  youngjedi: {t:"Young Jedi Adventures", y:"2023–", kind:"series", eps:60, m:800, tag:"side", when:"High Republic", side_only:true,
+    d:"Made for very young kids, set during the High Republic. Fine on its own terms, irrelevant to everything else."},
+  forces: {t:"Forces of Destiny", y:"2017–2018", kind:"series", eps:32, m:110, tag:"side", when:"various", side_only:true,
+    d:"Two-minute shorts filling gaps around the films. Pleasant, slight, skippable."},
+  legorebuild: {t:"LEGO Star Wars: Rebuild the Galaxy", y:"2024", kind:"series", eps:4, m:100, tag:"worth", when:"non-canon", side_only:true,
+    d:"Jumbled alternate galaxy, Sith Jar Jar included. Funnier than the premise deserves — and Pieces of the Past follows it in 2025."},
+  legospecials: {t:"LEGO specials (Holiday, Terrifying Tales, Summer Vacation)", y:"2020–2022", kind:"film", m:135, tag:"side", when:"non-canon", side_only:true,
+    d:"Three 45-minute LEGO specials. Holiday Special is the best of them."},
+  caravan: {t:"Caravan of Courage: An Ewok Adventure", y:"1984", kind:"film", m:97, tag:"side", when:"~3 ABY", side_only:true,
+    d:"A made-for-TV Ewok film from between Jedi and the prequels. A genuine curiosity."},
+  battleendor: {t:"Ewoks: The Battle for Endor", y:"1985", kind:"film", m:94, tag:"side", when:"~3 ABY", side_only:true,
+    d:"The follow-up, and surprisingly bleak in its opening ten minutes."},
+  droidsewoks: {t:"Droids / Ewoks (animated)", y:"1985–1986", kind:"series", eps:48, m:1100, tag:"side", when:"Legends", side_only:true,
+    d:"Two Saturday-morning cartoons from the eighties. Historical interest only."},
+  cw2d: {t:"Clone Wars (2D micro-series)", y:"2003–2005", kind:"series", eps:25, m:125, tag:"worth", when:"Legends",
+    when_note:"22–19 BBY", side_only:true,
+    d:"Genndy Tartakovsky's shorts, made between Episodes II and III. No longer canon, still some of the best action in Star Wars — General Grievous's introduction especially."},
+  holiday: {t:"The Star Wars Holiday Special", y:"1978", kind:"film", m:97, tag:"side", when:"disowned", side_only:true,
+    d:"Never officially released again, and you'll understand why within ten minutes. Contains Boba Fett's first appearance, which is the only reason anyone brings it up."}
+};
+
+/* ---------- Track 1: in-story order, by era ---------- */
+const CHRONO = [
+  {id:"e1", name:"The High Republic", when:"c. 132 BBY", items:["acolyte"]},
+  {id:"e2", name:"Fall of the Jedi", when:"32–19 BBY", items:["ep1","ep2","cwfilm","cwseries","totj","ep3"]},
+  {id:"e3", name:"Reign of the Empire", when:"19–0 BBY", items:["tote","totu","badbatch","maul1","maul2","solo","kenobi","andor1","andor2","rebels","rogueone"]},
+  {id:"e4", name:"Age of Rebellion", when:"0–4 ABY", items:["ep4","ep5","ep6"]},
+  {id:"e5", name:"The New Republic", when:"9 ABY", items:["mando1","mando2","bobf","mando3","ahsoka1","skeleton","mandogrogu","ahsoka2"]},
+  {id:"e6", name:"Rise of the First Order", when:"34–35 ABY", items:["resistance","ep7","ep8","ep9"]},
+  {id:"e7", name:"What comes next", when:"beyond 35 ABY", items:["starfighter"]}
+];
+
+/* ---------- Track 2: release order ---------- */
+const RELEASE = [
+  {id:"r1", name:"The original run", when:"1977–1983", items:["ep4","ep5","ep6"]},
+  {id:"r2", name:"The prequels", when:"1999–2008", items:["ep1","ep2","ep3","cwfilm","cwseries"]},
+  {id:"r3", name:"Lucasfilm under Disney", when:"2014–2019", items:["rebels","ep7","rogueone","ep8","solo","resistance","mando1","ep9"]},
+  {id:"r4", name:"The Disney+ years", when:"2020–2026", items:["mando2","badbatch","bobf","kenobi","andor1","totj","mando3","ahsoka1","tote","acolyte","skeleton","andor2","totu","maul1","mandogrogu"]},
+  {id:"r5", name:"Still to come", when:"2027", items:["ahsoka2","maul2","starfighter"]}
+];
+
+/* ---------- Track 3: outer rim ---------- */
+const OUTER = [
+  {id:"o1", name:"Visions", when:"anime anthology", items:["visions1","visions2","visions3","ninthjedi"]},
+  {id:"o2", name:"Shorts and kids' series", when:"various", items:["youngjedi","forces"]},
+  {id:"o3", name:"LEGO", when:"non-canon", items:["legorebuild","legospecials"]},
+  {id:"o4", name:"The old stuff", when:"1978–2005", items:["cw2d","caravan","battleendor","droidsewoks","holiday"]}
+];
+
+const TRACKS = {
+  chrono:  {eras: CHRONO,  mount: "chronoEras"},
+  release: {eras: RELEASE, mount: "releaseEras"},
+  outer:   {eras: OUTER,   mount: "outerEras"}
+};
+
+/* ==========================================================
+   STATE
+   ========================================================== */
+const KEY_PROGRESS = "sw-archive-progress-v1";
+const KEY_NOTES    = "sw-archive-notes-v1";
+const KEY_RATINGS  = "sw-archive-ratings-v1";
+const KEY_MILES    = "sw-archive-milestones-v1";
+const KEY_PACE     = "sw-archive-pace-v1";
+
+function load(key){
+  try { return JSON.parse(localStorage.getItem(key)) || {}; }
+  catch(e){ return {}; }
+}
+function save(key, obj){
+  try { localStorage.setItem(key, JSON.stringify(obj)); }
+  catch(e){ /* private mode or storage full — the page still works for this session */ }
+}
+
+let progress = load(KEY_PROGRESS);
+let notes    = load(KEY_NOTES);
+let ratings  = load(KEY_RATINGS);
+let miles    = load(KEY_MILES);
+
+let activeTrack  = "chrono";
+let activeFilter = "all";
+let query        = "";
+
+const COUNTED = Object.keys(ITEMS).filter(k => !ITEMS[k].side_only);
+
+/* ==========================================================
+   HELPERS
+   ========================================================== */
+function fmt(mins){
+  if(!mins) return "0m";
+  const h = Math.floor(mins/60), m = Math.round(mins%60);
+  if(h && m) return h + "h " + m + "m";
+  if(h) return h + "h";
+  return m + "m";
+}
+function fmtLong(mins){
+  const h = Math.floor(mins/60);
+  return h >= 100 ? h + "h" : fmt(mins);
+}
+function tagChip(it){
+  if(it.tag === "core")  return '<span class="tag core">CORE</span>';
+  if(it.tag === "worth") return '<span class="tag worth">WORTH IT</span>';
+  if(it.tag === "side")  return '<span class="tag side">SIDE PATH</span>';
+  return "";
+}
+function kindLabel(it){
+  if(it.kind === "film") return "film";
+  return it.eps ? it.eps + " eps" : "series";
+}
+function passesFilter(slug, it){
+  if(activeFilter === "core"      && it.tag !== "core")     return false;
+  if(activeFilter === "unwatched" && progress[slug])        return false;
+  if(activeFilter === "films"     && it.kind !== "film")    return false;
+  if(activeFilter === "rated"     && (ratings[slug]||0) < 4) return false;
+  return true;
+}
+function passesSearch(it){
+  if(!query) return true;
+  return (it.t + " " + (it.d||"") + " " + (it.when||"")).toLowerCase().includes(query);
+}
+function nextSlug(){
+  for(const era of CHRONO){
+    for(const slug of era.items){
+      if(!progress[slug] && !ITEMS[slug].soon) return slug;
+    }
+  }
+  return null;
+}
+
+const STAR_SPEC = {
+  far: "0.7,7.08,43.46,190,205,245,0.30;1.1,29.4,97.84,210,222,255,0.40;0.9,74.43,92.65,210,222,255,0.40;1.3,46.85,12.8,210,222,255,0.40;0.9,71.45,72.82,255,245,220,0.30;0.6,70.49,63.87,255,245,220,0.30;0.7,11.23,38.41,190,205,245,0.30;0.7,2.38,0.95,255,245,220,0.30;1.3,46.8,61.52,190,205,245,0.30;0.7,60.39,94.99,190,205,245,0.30;0.8,6.96,75.72,255,245,220,0.30;0.9,87.65,79.37,210,222,255,0.40;0.6,31.04,40.35,255,245,220,0.30;0.9,11.79,47.37,210,222,255,0.40;0.6,65.37,56.07,255,245,220,0.30;0.9,84.83,42.61,190,205,245,0.30;1.3,79.11,88.38,210,222,255,0.40;0.8,18.39,91.78,210,222,255,0.40;1.1,28.28,89.8,255,245,220,0.30;1.1,45.84,3.48,255,245,220,0.30;0.6,17.46,28.83,190,205,245,0.30;0.6,6.03,77.48,210,222,255,0.40;0.7,39.79,16.71,255,245,220,0.30;0.7,67.4,69.68,255,245,220,0.30;1.1,10.12,42.21,210,222,255,0.40;1.1,30.21,38.67,255,245,220,0.30;0.6,23.29,95.55,190,205,245,0.30;1.1,77.94,8.89,190,205,245,0.30;0.8,37.33,60.51,190,205,245,0.30;0.6,70.43,26.9,190,205,245,0.30;0.7,75.2,16.82,255,245,220,0.30;0.7,21.19,14.48,210,222,255,0.40;1.1,77.91,84.2,190,205,245,0.30;0.6,75.32,86.76,255,245,220,0.30;0.8,62.03,59.14,255,245,220,0.30;0.9,52.13,56.08,210,222,255,0.40;0.8,69.21,77.83,190,205,245,0.30;0.6,31.03,29.74,255,245,220,0.30;1.1,8.23,72.61,255,245,220,0.30;1.3,36.3,84.22,210,222,255,0.40;0.9,19.79,20.67,255,245,220,0.30;1.1,26.69,76.79,210,222,255,0.40;1.3,82.54,40.61,210,222,255,0.40;1.3,43.36,91.79,190,205,245,0.30;0.7,71.89,76.25,255,245,220,0.30;0.8,16.3,81.74,255,245,220,0.30",
+  mid: "0.7,70.91,75.1,255,240,210,0.52;0.9,30.42,86.89,190,225,255,0.55;1.3,43.82,31.86,255,240,210,0.52;0.9,95.77,67.62,190,225,255,0.55;1.1,81.93,70.83,255,240,210,0.52;0.7,74.31,53.81,190,225,255,0.55;1.1,50.21,58.09,225,235,255,0.62;0.7,64.71,74.22,255,240,210,0.52;0.8,31.74,88.59,190,225,255,0.55;0.9,20.25,39.08,225,235,255,0.62;0.8,87.0,86.48,255,240,210,0.52;0.6,98.4,28.91,225,235,255,0.62;0.8,53.39,95.63,190,225,255,0.55;1.3,97.79,52.13,225,235,255,0.62;1.1,81.65,0.96,190,225,255,0.55;1.1,53.07,65.04,225,235,255,0.62;0.7,33.89,63.74,225,235,255,0.62;0.8,30.83,82.35,190,225,255,0.55;0.9,55.71,98.77,190,225,255,0.55;1.1,90.2,96.15,190,225,255,0.55;1.3,4.26,78.04,225,235,255,0.62;0.7,3.71,37.24,190,225,255,0.55;0.8,19.17,2.91,255,240,210,0.52;0.7,79.92,94.82,255,240,210,0.52;1.1,49.02,52.73,225,235,255,0.62;0.9,7.95,87.42,225,235,255,0.62",
+  near: "0.8,95.84,53.88,200,230,255,0.8;0.7,43.94,32.27,255,255,255,0.85;0.7,88.56,16.96,200,230,255,0.8;0.8,75.87,41.42,200,230,255,0.8;0.9,48.62,10.06,255,255,255,0.85;0.9,67.6,1.63,200,230,255,0.8;0.9,3.09,9.62,255,238,200,0.8;1.1,11.82,31.58,200,230,255,0.8;1.3,29.54,96.91,255,255,255,0.85;1.3,0.26,40.05,255,238,200,0.8;0.8,4.59,75.86,255,255,255,0.85;0.6,96.68,13.53,200,230,255,0.8",
+};
+
+/* ==========================================================
+   STARFIELD
+   The dots used to be ~46 stacked radial-gradients per layer,
+   re-rastered by the compositor over an area 2.5x the viewport.
+   Same dots, same positions, same falloff — but painted once
+   into a single tile bitmap, so the layers cost one texture
+   blit instead of a gradient stack per raster tile.
+   ========================================================== */
+function bakeStarfield(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const TILES = {far: 900, mid: 700, near: 520};
+
+  Object.keys(TILES).forEach(name => {
+    const el = document.querySelector(".star-layer." + name);
+    if(!el || !STAR_SPEC[name]) return;
+    const tile = TILES[name];
+
+    const cv = document.createElement("canvas");
+    cv.width  = Math.round(tile * dpr);
+    cv.height = Math.round(tile * dpr);
+    const ctx = cv.getContext("2d");
+    if(!ctx) return;
+    ctx.scale(dpr, dpr);
+
+    /* CSS paints the first background layer on top, so draw back to front */
+    const stars = STAR_SPEC[name].split(";");
+    for(let i = stars.length - 1; i >= 0; i--){
+      const p = stars[i].split(",");
+      const r = +p[0];
+      const x = +p[1] / 100 * tile;
+      const y = +p[2] / 100 * tile;
+      const rgb = p[3] + "," + p[4] + "," + p[5];
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, "rgba(" + rgb + "," + p[6] + ")");
+      g.addColorStop(1, "rgba(" + rgb + ",0)");   /* same hue at alpha 0 — matches CSS premultiplied falloff */
+      ctx.fillStyle = g;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+
+    const use = src => { el.style.backgroundImage = 'url("' + src + '")'; };
+    if(cv.toBlob) cv.toBlob(b => use(b ? URL.createObjectURL(b) : cv.toDataURL()));
+    else use(cv.toDataURL());
+  });
+}
+
+/* the crawl is the one thing that repaints every frame (perspective + mask +
+   text-shadow can't be composited without softening the glyphs). Off screen,
+   nobody is looking at it. */
+function watchCrawl(){
+  const stage = document.querySelector(".crawl-stage");
+  if(!stage) return;
+  if(!("IntersectionObserver" in window)) return;
+  new IntersectionObserver(entries => {
+    stage.classList.toggle("idle", !entries[0].isIntersecting);
+  }, {rootMargin: "150px"}).observe(stage);
+}
+
+/* ==========================================================
+   RENDER
+   The list is built exactly once. Every later interaction —
+   check, rating, note, search, filter, track switch — flips
+   classes and text on nodes that already exist. No innerHTML
+   rebuild, no listener churn: one delegated handler per track.
+   ========================================================== */
+const rowIndex   = [];          /* every row, every track */
+const eraIndex   = [];          /* {trackId, node, rows} */
+const rowsBySlug = new Map();   /* a title appears in more than one track */
+const noteTimers = new Map();
+let lastLeftMin  = 0;
+
+function buildEra(era, trackId){
+  const wrap = document.createElement("section");
+  wrap.className = "era";
+  wrap.dataset.era = trackId + "-" + era.id;
+
+  const totalMin = era.items.reduce((s,k) => s + (ITEMS[k].m||0), 0);
+
+  const head = document.createElement("button");
+  head.className = "era-head";
+  head.type = "button";
+  head.innerHTML =
+    '<span class="era-name">' + era.name +
+      '<span class="era-when">' + era.when + '</span>' +
+      '<span class="era-seal">COMPLETE</span>' +
+    '</span>' +
+    '<span class="era-meta">' + era.items.length + ' titles · ' + fmtLong(totalMin) +
+      '<span class="chev">▾</span></span>';
+  wrap.appendChild(head);
+
+  const list = document.createElement("div");
+  list.className = "item-list";
+  const rows = [];
+
+  era.items.forEach(slug => {
+    const it = ITEMS[slug];
+
+    const row = document.createElement("article");
+    row.className = "item";
+    row.dataset.slug = slug;
+
+    /* state-dependent bits (✓, star fill, note text, WATCH NEXT) are set by
+       syncRow / applyFilters — the markup itself never has to be rebuilt */
+    row.innerHTML =
+      '<button class="check" type="button" ' + (it.soon ? "disabled" : "") +
+        ' aria-pressed="false" aria-label="Mark ' + it.t.replace(/"/g,"") + ' as watched"></button>' +
+      '<div class="item-body">' +
+        '<div class="title-row">' +
+          '<span class="item-title">' + it.t + '</span>' +
+          '<span class="item-year">' + it.y + '</span>' +
+          tagChip(it) +
+          (it.soon ? '<span class="tag soon">INCOMING</span>' : "") +
+          (trackId === "chrono" ? '<span class="next-flag">WATCH NEXT</span>' : "") +
+        '</div>' +
+        (it.d ? '<div class="item-desc">' + it.d + '</div>' : "") +
+        '<div class="stars-row" role="group" aria-label="Your rating">' +
+          [1,2,3,4,5].map(n =>
+            '<button class="star-btn" type="button" data-star="' + n +
+            '" aria-label="' + n + ' out of 5">★</button>').join("") +
+          '<button class="rating-clear" type="button">clear</button>' +
+        '</div>' +
+        '<button class="note-toggle" type="button">+ note</button>' +
+        '<span class="saved">saved</span>' +
+        '<div class="note-box">' +
+          '<textarea placeholder="Your note — saves as you type"></textarea>' +
+        '</div>' +
+      '</div>' +
+      '<div class="item-right">' +
+        '<span class="runtime">' + fmt(it.m) + '</span>' +
+        '<span class="kind">' + kindLabel(it) + '</span>' +
+        (it.when ? '<span class="when-tag">' + it.when + '</span>' : "") +
+      '</div>';
+
+    list.appendChild(row);
+
+    const entry = {slug: slug, node: row, trackId: trackId};
+    rows.push(entry);
+    rowIndex.push(entry);
+    if(!rowsBySlug.has(slug)) rowsBySlug.set(slug, []);
+    rowsBySlug.get(slug).push(entry);
+  });
+
+  wrap.appendChild(list);
+  eraIndex.push({trackId: trackId, node: wrap, rows: rows});
+  return wrap;
+}
+
+/* ---------- write state into one row ---------- */
+function syncRow(entry, withNotes){
+  const slug = entry.slug, node = entry.node;
+
+  const done = !!progress[slug];
+  node.classList.toggle("done", done);
+  const check = node.querySelector(".check");
+  check.textContent = done ? "✓" : "";
+  check.setAttribute("aria-pressed", String(done));
+
+  const rating = ratings[slug] || 0;
+  node.classList.toggle("rated", rating > 0);
+  const stars = node.querySelectorAll(".star-btn");
+  for(let i = 0; i < stars.length; i++) stars[i].classList.toggle("on", i < rating);
+
+  const note = notes[slug] || "";
+  node.querySelector(".note-toggle").textContent = note ? "edit note" : "+ note";
+  if(withNotes){
+    node.querySelector("textarea").value = note;
+    node.querySelector(".note-box").classList.toggle("open", !!note);
+  }
+}
+function syncSlug(slug, withNotes, except){
+  const list = rowsBySlug.get(slug) || [];
+  list.forEach(e => { if(e.node !== except) syncRow(e, withNotes); });
+}
+function syncAll(withNotes){
+  rowIndex.forEach(e => syncRow(e, withNotes));
+}
+
+/* ---------- visibility: class flips only, no DOM churn ---------- */
+function applyFilters(){
+  const next = nextSlug();
+  let visibleErasHere = 0;
+
+  eraIndex.forEach(era => {
+    let anyVisible = false, allDone = true;
+
+    era.rows.forEach(r => {
+      const it = ITEMS[r.slug];
+      if(!progress[r.slug] && !it.soon) allDone = false;
+      const visible = passesFilter(r.slug, it) && passesSearch(it);
+      if(visible) anyVisible = true;
+      r.node.classList.toggle("filtered-out", !visible);
+      r.node.classList.toggle("is-next", era.trackId === "chrono" && r.slug === next);
+    });
+
+    era.node.classList.toggle("filtered-out", !anyVisible);
+    era.node.classList.toggle("era-done", allDone && era.rows.length > 0);
+    if(era.trackId === activeTrack && anyVisible) visibleErasHere++;
+  });
+
+  document.getElementById("emptyState").style.display = visibleErasHere === 0 ? "block" : "none";
+}
+
+/* ---------- headline numbers ---------- */
+function updateStats(){
+  let done = 0, leftMin = 0, totalMin = 0;
+  COUNTED.forEach(slug => {
+    const it = ITEMS[slug];
+    totalMin += it.m || 0;
+    if(progress[slug]) done++; else leftMin += it.m || 0;
+  });
+  const total = COUNTED.length;
+  const pct = total ? Math.round((done/total)*100) : 0;
+  lastLeftMin = leftMin;
+
+  document.getElementById("statWatched").textContent = done;
+  document.getElementById("statLeft").textContent    = total - done;
+  document.getElementById("statRuntime").textContent = fmtLong(leftMin);
+  document.getElementById("doneCount").textContent   = done;
+  document.getElementById("totalCount").textContent  = total;
+  document.getElementById("donePct").textContent     = pct + "%";
+  document.getElementById("footRuntime").textContent = fmtLong(totalMin);
+
+  const blade = document.getElementById("blade");
+  blade.style.width = pct + "%";
+  blade.classList.toggle("zero", pct === 0);
+
+  const rated = Object.keys(ratings).filter(k => ratings[k] > 0);
+  document.getElementById("statRated").textContent = rated.length
+    ? (rated.reduce((s,k) => s + ratings[k], 0) / rated.length).toFixed(1)
+    : "—";
+
+  updatePace(leftMin);
+  checkMilestones(done, total);
+}
+
+function refresh(){
+  applyFilters();
+  updateStats();
+}
+
+/* ---------- pace planner ---------- */
+function updatePace(leftMin){
+  const range = document.getElementById("paceRange");
+  const halfHours = Number(range.value);           /* 1 = 0.5h */
+  const perDay = halfHours / 2;
+  document.getElementById("paceLabel").textContent =
+    (perDay % 1 === 0 ? perDay : perDay.toFixed(1)) + "h a day";
+
+  const eta = document.getElementById("paceEta");
+  if(leftMin <= 0){
+    eta.textContent = "the archive is complete";
+    return;
+  }
+  const days = Math.ceil(leftMin / (perDay * 60));
+  const end = new Date();
+  end.setDate(end.getDate() + days);
+  const when = end.toLocaleDateString(undefined, {day:"numeric", month:"short", year:"numeric"});
+  eta.textContent = days + (days === 1 ? " day" : " days") + " — done by " + when;
+}
+
+/* ---------- milestones ---------- */
+function checkMilestones(done, total){
+  if(!total) return;
+  const pct = (done/total)*100;
+  [25,50,75,100].forEach(m => {
+    if(pct >= m && !miles[m]){
+      miles[m] = true;
+      save(KEY_MILES, miles);
+      const shell = document.getElementById("saberShell");
+      shell.animate(
+        [{boxShadow:"0 0 0 0 rgba(255,214,61,.55)"},
+         {boxShadow:"0 0 0 16px rgba(255,214,61,0)"}],
+        {duration:1500, easing:"ease-out"}
+      );
+    }
+  });
+}
+
+/* ==========================================================
+   DELEGATED LIST EVENTS — one click + one input handler per
+   track, instead of ~10 listeners on every row
+   ========================================================== */
+function onListClick(e){
+  const head = e.target.closest(".era-head");
+  if(head){
+    head.parentElement.classList.toggle("collapsed");
+    return;
+  }
+
+  const row = e.target.closest(".item");
+  if(!row) return;
+  const slug = row.dataset.slug;
+
+  if(e.target.closest(".check")){
+    if(ITEMS[slug].soon) return;
+    if(progress[slug]) delete progress[slug]; else progress[slug] = true;
+    save(KEY_PROGRESS, progress);
+    syncSlug(slug);
+    refresh();
+    return;
+  }
+
+  const star = e.target.closest(".star-btn");
+  if(star){
+    const n = Number(star.dataset.star);
+    if((ratings[slug] || 0) === n) delete ratings[slug]; else ratings[slug] = n;
+    save(KEY_RATINGS, ratings);
+    syncSlug(slug);
+    refresh();
+    return;
+  }
+
+  if(e.target.closest(".rating-clear")){
+    delete ratings[slug];
+    save(KEY_RATINGS, ratings);
+    syncSlug(slug);
+    refresh();
+    return;
+  }
+
+  if(e.target.closest(".note-toggle")){
+    const box = row.querySelector(".note-box");
+    box.classList.toggle("open");
+    if(box.classList.contains("open")) row.querySelector("textarea").focus();
+    return;
+  }
+}
+
+function onListInput(e){
+  const ta = e.target;
+  if(!ta.matches || !ta.matches(".note-box textarea")) return;
+  const row  = ta.closest(".item");
+  const slug = row.dataset.slug;
+
+  clearTimeout(noteTimers.get(ta));
+  noteTimers.set(ta, setTimeout(() => {
+    if(ta.value) notes[slug] = ta.value; else delete notes[slug];
+    save(KEY_NOTES, notes);
+    row.querySelector(".note-toggle").textContent = ta.value ? "edit note" : "+ note";
+    syncSlug(slug, true, row);      /* same title in the other tracks */
+    const savedT = row.querySelector(".saved");
+    savedT.classList.add("show");
+    setTimeout(() => savedT.classList.remove("show"), 1100);
+  }, 450));
+}
+
+/* ==========================================================
+   CONTROLS
+   ========================================================== */
+document.querySelectorAll(".track-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".track-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".track-panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    activeTrack = btn.dataset.track;
+    document.getElementById("track-" + activeTrack).classList.add("active");
+    applyFilters();
+  });
+});
+
+document.querySelectorAll(".pill").forEach(pill => {
+  pill.addEventListener("click", () => {
+    document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+    pill.classList.add("active");
+    activeFilter = pill.dataset.filter;
+    applyFilters();
+  });
+});
+
+let searchTimer;
+document.getElementById("searchInput").addEventListener("input", e => {
+  const raw = e.target.value.trim().toLowerCase();
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    const isOrder66 = raw.replace(/[^a-z0-9]/g, "") === "order66";
+    document.body.classList.toggle("dark-side", isOrder66);
+    query = isOrder66 ? "" : raw;
+    applyFilters();
+  }, 60);
+});
+
+/* the slider only moves one line of text — it never needed a re-render */
+document.getElementById("paceRange").addEventListener("input", () => {
+  save(KEY_PACE, {v: document.getElementById("paceRange").value});
+  updatePace(lastLeftMin);
+});
+
+document.getElementById("jumpBtn").addEventListener("click", () => {
+  const slug = nextSlug();
+  if(!slug){
+    alert("That's the whole archive. Everything left is still unreleased.");
+    return;
+  }
+  document.querySelectorAll(".track-btn").forEach(b => b.classList.toggle("active", b.dataset.track === "chrono"));
+  document.querySelectorAll(".track-panel").forEach(p => p.classList.toggle("active", p.id === "track-chrono"));
+  activeTrack = "chrono";
+  applyFilters();
+  const el = document.querySelector('#track-chrono .item[data-slug="' + slug + '"]');
+  if(el){
+    const era = el.closest(".era");
+    if(era) era.classList.remove("collapsed");
+    setTimeout(() => el.scrollIntoView({behavior:"smooth", block:"center"}), 60);
+  }
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if(confirm("Clear all watch progress? Notes and ratings are kept.")){
+    progress = {};
+    miles = {};
+    save(KEY_PROGRESS, progress);
+    save(KEY_MILES, miles);
+    syncAll();
+    refresh();
+  }
+});
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const bundle = {
+    exportedAt: new Date().toISOString(),
+    source: "star-wars-archive-tracker",
+    progress, notes, ratings, milestones: miles
+  };
+  const blob = new Blob([JSON.stringify(bundle, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "star-wars-progress-" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("importBtn").addEventListener("click", () => {
+  document.getElementById("importFile").click();
+});
+document.getElementById("importFile").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let bundle;
+    try { bundle = JSON.parse(reader.result); }
+    catch(err){
+      alert("That file couldn't be read. It needs to be a progress export from this page.");
+      e.target.value = "";
+      return;
+    }
+    if(!bundle || typeof bundle.progress !== "object"){
+      alert("That's valid JSON, but not a progress export from this page.");
+      e.target.value = "";
+      return;
+    }
+    const when = bundle.exportedAt ? new Date(bundle.exportedAt).toLocaleString() : "an unknown date";
+    if(!confirm("Import the export from " + when + "? It replaces the progress, notes and ratings stored in this browser.")){
+      e.target.value = "";
+      return;
+    }
+    progress = bundle.progress || {};
+    notes    = bundle.notes    || {};
+    ratings  = bundle.ratings  || {};
+    miles    = bundle.milestones || {};
+    save(KEY_PROGRESS, progress);
+    save(KEY_NOTES, notes);
+    save(KEY_RATINGS, ratings);
+    save(KEY_MILES, miles);
+    syncAll(true);
+    refresh();
+    e.target.value = "";
+  };
+  reader.readAsText(file);
+});
+
+/* stop ambient animation while the tab is hidden */
+document.addEventListener("visibilitychange", () => {
+  document.documentElement.classList.toggle("paused", document.hidden);
+});
+
+/* ---------- build the three tracks once, then draw ---------- */
+(function init(){
+  const saved = load(KEY_PACE);
+  if(saved && saved.v) document.getElementById("paceRange").value = saved.v;
+
+  Object.keys(TRACKS).forEach(trackId => {
+    const mount = document.getElementById(TRACKS[trackId].mount);
+    const frag  = document.createDocumentFragment();
+    TRACKS[trackId].eras.forEach(era => frag.appendChild(buildEra(era, trackId)));
+    mount.appendChild(frag);
+    mount.addEventListener("click", onListClick);
+    mount.addEventListener("input", onListInput);
+  });
+
+  syncAll(true);
+  refresh();
+  bakeStarfield();
+  watchCrawl();
+})();
+
+/* PWA install support — safe to no-op if unsupported (older Safari, file://) */
+if("serviceWorker" in navigator && location.protocol !== "file:"){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

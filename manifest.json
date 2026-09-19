@@ -1,0 +1,16 @@
+{
+  "name": "The Whole Saga, In Order",
+  "short_name": "SW Archive",
+  "description": "Every Star Wars film and series in chronological order, with progress tracking, notes and ratings.",
+  "start_url": "./star-wars-watch-order.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#05070f",
+  "theme_color": "#05070f",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
